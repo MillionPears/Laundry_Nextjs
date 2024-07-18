@@ -1,6 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation"; // Thay đổi từ "next/navigation" thành "next/router"
 
@@ -14,9 +13,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Login } from "../../api/auth";
 import { LoginBody, LoginBodyType } from "../../schemaValidations/auth.schema";
 import authApiRequest from "@/app/apiRequest/auth";
+import { useAppContext } from "@/app/app-provider";
 
 export default function LoginForm() {
   const form = useForm<LoginBodyType>({
@@ -27,11 +26,21 @@ export default function LoginForm() {
     },
   });
   const router = useRouter();
+  //const { user } = useAppContext();
 
   async function onSubmit(values: LoginBodyType) {
     try {
       const data = await authApiRequest.login(values);
-      await authApiRequest.auth({ sessionToken: data.payload.data.token });
+
+      await authApiRequest.auth({
+        sessionToken: data.payload.data.token,
+        username: data.payload.data.username,
+      });
+      // if (user && user.username) {
+      //   const roleData = await authApiRequest.roleid(user?.username);
+      //   if (roleData.payload.roleid == 1) {
+      //   }
+      // }
 
       router.push("/", { scroll: true });
     } catch (error) {

@@ -66,7 +66,7 @@ const request = async<Response> (
         status: res.status,
         payload
     }
-    console.log("http ",data)
+    
     if(!res.ok)
     {
        

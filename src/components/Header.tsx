@@ -2,10 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import logo from "/public/image/logo.png";
 import { cookies } from "next/headers";
-import Avatar from "/public/image/avt.png";
 import ProfileDropdownMenuDemo from "@/app/pages/profile/ProfileDropdownMenuDemo";
+import {
+  CustomerResType,
+  StaffResType,
+} from "@/app/schemaValidations/auth.schema";
 
-export default function Header() {
+export default function Header({
+  user,
+}: {
+  user: CustomerResType["data"] | StaffResType["data"] | null;
+}) {
   const cookieStore = cookies();
   const sessionToken = cookieStore.get("sessionToken");
 
@@ -43,7 +50,7 @@ export default function Header() {
             <li>
               <Link
                 href="/pages/login"
-                className="text-blue-600 hover:text-blue-800 font-semibold transition duration-300"
+                className="text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white font-semibold transition duration-300 px-4 py-2 rounded-full"
               >
                 Đăng Nhập
               </Link>

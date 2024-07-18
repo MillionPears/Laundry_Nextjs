@@ -46,8 +46,11 @@ export default function RegisterForm() {
   async function onSubmit(values: RegisterBodyType) {
     try {
       const data = await authApiRequest.register(values);
-      await authApiRequest.auth({ sessionToken: data.payload.data.token });
-      console.log("tokennnn ", data.payload.data.token);
+      await authApiRequest.auth({
+        sessionToken: data.payload.data.token,
+        username: data.payload.data.username,
+      });
+
       // await authApiRequest.auth({ sessionToken: data.payload.data.token });
       // setSessionToken(data.payload.data.token);
 

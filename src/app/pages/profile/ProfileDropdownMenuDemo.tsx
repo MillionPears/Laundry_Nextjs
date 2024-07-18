@@ -43,7 +43,7 @@ export default function ProfileDropdownMenuDemo() {
         <DropdownMenuItem className="text-sm">
           {" "}
           {/* Adjust font size */}
-          <Link href="/create-appointment">Tạo lịch hẹn</Link>
+          <Link href="/pages/apointment">Tạo lịch hẹn</Link>
         </DropdownMenuItem>
         <DropdownMenuItem className="text-sm">
           {" "}

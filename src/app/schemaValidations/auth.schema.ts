@@ -1,4 +1,4 @@
-import z from 'zod'
+import z, { date } from 'zod'
 
 export const RegisterBody = z
   .object({
@@ -17,11 +17,9 @@ export const RegisterBody = z
   data: z.object({
     token: z.string(),
     expiresAt: z.string(),
-    account: z.object({
-      username: z.string(),
-      role: z.number(),
+    username: z.string()
     })
-  }),
+  ,
   message: z.string()
 })
 
@@ -40,13 +38,54 @@ export const LoginRes = RegisterRes
 
 export type LoginResType = z.TypeOf<typeof LoginRes>
 
-export const UserRes = z
-  .object({
-    data: z.object({
+
+// Định nghĩa schema cho CustomerRes
+export const CustomerRes = z.object({
+  
+  data: z.object({
+      id: z.number(),
+      name: z.string(),
+      address: z.string(),
+      email: z.string(),
+      phoneNumber: z.string(),
+      hobbie: z.string(),
+      avatar: z.string(),
       username: z.string(),
-     role: z.number(),
+      rankId: z.number() // Sử dụng optional nếu giá trị có thể là null hoặc undefined
     }),
     message: z.string()
-  })
+});
+export type CustomerResType = z.infer<typeof CustomerRes>;
 
-export type UserResType = z.TypeOf<typeof UserRes>
+ 
+// Định nghĩa schema cho StaffRes
+export const StaffRes = z.object({
+  data: z.object({
+      id: z.number(),
+      name: z.string(),
+      position: z.string(),
+      email: z.string(),
+      phoneNumber: z.string(),
+      avatar: z.string(),
+      username: z.string(),
+    }),
+    message: z.string()
+});
+export type StaffResType = z.infer<typeof StaffRes>;
+
+// export const UserRes = z
+//   .object({
+//     data: z.object({
+//     username: z.string()
+//     }),
+//     message: z.string()
+//   })
+
+// export type UserResType = z.TypeOf<typeof UserRes>
+
+export const RoleRes = z
+  .object({
+    data:z.number(),
+    message: z.string()
+  }).strict()
+  export type RoleResType = z.TypeOf<typeof RoleRes>

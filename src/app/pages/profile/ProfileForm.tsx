@@ -19,32 +19,31 @@ import {
   UpdateProfileBody,
   UpdateProfileBodyType,
 } from "@/app/schemaValidations/profile.schema";
-import profileApiRequest from "@/app/apiRequest/profile";
-import { useRef, useState } from "react";
 
-type Profile = ProfileResType["data"];
+import { useAppContext } from "@/app/app-provider";
+import { use, useRef, useState } from "react";
 
-export default function ProfileForm({ profile }: { profile: Profile }) {
+export default function ProfileForm() {
+  const { user } = useAppContext();
+
+  const router = useRouter();
   const form = useForm<UpdateProfileBodyType>({
     resolver: zodResolver(UpdateProfileBody),
     defaultValues: {
-      username: "million",
-      name: profile.name,
-      address: profile.address,
-      hobbie: profile.hobbie,
-      email: profile.email,
-      phoneNumber: profile.phoneNumber,
-      avatar: "",
+      name: user?.name,
+      email: user?.email,
+      phoneNumber: user?.phoneNumber,
+      avatar: user?.avatar,
     },
   });
-  const router = useRouter();
+
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const avatar = form.watch("avatar");
+
   async function onSubmit(values: UpdateProfileBodyType) {
     try {
-      const data = await profileApiRequest.updateProfile(5, values);
-      console.log(data.payload.message); // Log response message if needed
+      //console.log(data.payload.message); // Log response message if needed
       router.push("/pages/profile");
     } catch (error) {
       console.error("Error:", error);
@@ -64,7 +63,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
               <FormControl>
                 <Input
                   placeholder="shadcn"
-                  value="million"
+                  value={user?.username}
                   readOnly
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
@@ -81,7 +80,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
                   <FormControl>
                     <Input
                       placeholder="Enter your full name"
-                      {...field}
+                      value={user?.name}
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     />
                   </FormControl>
@@ -89,34 +88,15 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-gray-700 text-sm font-bold mb-2">
-                    Address
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your address"
-                      {...field}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormItem>
               <FormLabel className="block text-gray-700 text-sm font-bold mb-2">
                 Email
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="shadcn"
-                  type="email"
-                  value={profile.email}
+                  placeholder="email"
+                  value={user?.email}
                   readOnly
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
@@ -128,33 +108,14 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="shadcn"
+                  placeholder="phoneNumber"
                   type="string"
-                  value={profile.phoneNumber}
+                  value={user?.phoneNumber}
                   readOnly
                   className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 />
               </FormControl>
             </FormItem>
-            <FormField
-              control={form.control}
-              name="hobbie"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="block text-gray-700 text-sm font-bold mb-2">
-                    Hobbie
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter your hobby"
-                      {...field}
-                      className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
           <div className="w-5/12 space-y-6 flex flex-col items-center">
             <FormField
@@ -211,7 +172,7 @@ export default function ProfileForm({ profile }: { profile: Profile }) {
               type="submit"
               className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             >
-              {profile ? "Cập nhật thông tin" : "Thêm thông tin cá nhân"}
+              {user ? "Cập nhật thông tin" : "Thêm thông tin cá nhân"}
             </Button>
           </div>
         </form>

@@ -63,9 +63,9 @@ export default async function Home() {
               <Image
                 src={getImagePath("reason1")}
                 alt="Example image"
-                layout="responsive"
-                width={500}
-                height={500}
+                layout="fixed"
+                width={200}
+                height={200}
                 className="object-cover rounded-lg"
               />
               <div className="mt-4 text-center">
@@ -85,9 +85,9 @@ export default async function Home() {
               <Image
                 src={getImagePath("reason2")}
                 alt="Example image"
-                layout="responsive"
-                width={500}
-                height={500}
+                layout="fixed"
+                width={200}
+                height={200}
                 className="object-cover rounded-lg"
               />
               <div className="mt-4 text-center">
@@ -107,9 +107,9 @@ export default async function Home() {
               <Image
                 src={getImagePath("reason3")}
                 alt="Example image"
-                layout="responsive"
-                width={500}
-                height={500}
+                layout="fixed"
+                width={200}
+                height={200}
                 className="object-cover rounded-lg"
               />
               <div className="mt-4 text-center">
@@ -128,14 +128,14 @@ export default async function Home() {
       </section>
 
       {/* Tất cả dịch vụ */}
-      <section className="flex justify-center w-full  bg-blue-50 shadow-lg  overflow-hidden">
+      <section className="flex justify-center w-full bg-blue-50 shadow-lg overflow-hidden">
         <div className="flex flex-col w-full max-w-6xl p-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-center">
+            <h2 className="text-2xl font-bold text-center  text-blue-800">
               Các dịch vụ của chúng tôi
             </h2>
           </div>
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {(data || []).map((item: any) => (
               <div
                 key={item.serviceId}
@@ -144,9 +144,9 @@ export default async function Home() {
                 <Image
                   src={getImagePath(`service${item.serviceId}`)}
                   alt={item.serviceName}
-                  layout="responsive"
-                  width={500}
-                  height={500}
+                  layout="fixed"
+                  width={200}
+                  height={200}
                   className="object-cover rounded-t-lg"
                 />
 
@@ -160,6 +160,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
       {/* Section quy trình giặt ủi */}
       <section className="flex justify-center w-full bg-blue-50 shadow-lg overflow-hidden">
         <div className="flex flex-col w-full max-w-6xl p-8">

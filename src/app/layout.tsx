@@ -5,6 +5,14 @@ import Header from "@/components/Header";
 import AppProvider from "./app-provider";
 import { cookies } from "next/headers";
 import profileApiRequest from "./apiRequest/profile";
+import {
+  CustomerResType,
+  RoleResType,
+  StaffResType,
+} from "./schemaValidations/auth.schema";
+import authApiRequest from "./apiRequest/auth";
+import { HttpError } from "./untils/http";
+
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,15 +27,54 @@ export default async function RootLayout({
 }>) {
   const cookieStore = cookies();
   const sessionToken = cookieStore.get("sessionToken");
-  let user = null;
-  if (sessionToken) {
-    const data = await profileApiRequest.profile(sessionToken);
+  type CustomerDataType = CustomerResType["data"];
+  type StaffDataType = StaffResType["data"];
+  let user: CustomerDataType | StaffDataType | null = null;
+  // if (sessionToken) {
+  //   const data = await profileApiRequest.profile(sessionToken);
+  // }
+  const username = cookieStore.get("username");
+
+  if (username && sessionToken) {
+    try {
+      const roleData = await authApiRequest.roleid(
+        username.value,
+        sessionToken.value
+      );
+
+      if (roleData) {
+        if (roleData.payload.data === 1) {
+          const result = await profileApiRequest.customerProfile(
+            username.value,
+            sessionToken.value
+          );
+
+          user = result.payload.data;
+        } else {
+          const result = await profileApiRequest.staffProfile(
+            username.value,
+            sessionToken.value
+          );
+          user = result.payload.data;
+        }
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      // Nếu muốn xử lý lỗi cụ thể hơn, có thể kiểm tra lỗi và in ra các thông tin chi tiết
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Stack trace:", error.stack);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
   }
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Header />
-        <AppProvider initialSessionToken={sessionToken?.value}>
+        <AppProvider initialSessionToken={sessionToken?.value} user={user}>
+          <Header user={user} />
           {children}
         </AppProvider>
       </body>

@@ -1,8 +1,13 @@
+'use server'
 import { cookies } from 'next/headers'
 
 export async function POST(request: Request) {
  const res = await request.json()
   const sessionToken = res.sessionToken as string
+  
+  const username = res.username as string
+  cookies().set('username', username)
+  
  if (!sessionToken) {
     return Response.json(
       { message: 'Không nhận được session token' },
@@ -15,6 +20,7 @@ export async function POST(request: Request) {
     status:200,
     headers: {
         'Set-Cookie':`sessionToken=${sessionToken}; Path=/ `
+       
     }
  })
 }
