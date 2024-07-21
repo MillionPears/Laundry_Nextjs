@@ -17,7 +17,8 @@ export const RegisterBody = z
   data: z.object({
     token: z.string(),
     expiresAt: z.string(),
-    username: z.string()
+    username: z.string(),
+    userId: z.number()
     })
   ,
   message: z.string()
@@ -89,3 +90,11 @@ export const RoleRes = z
     message: z.string()
   }).strict()
   export type RoleResType = z.TypeOf<typeof RoleRes>
+
+  export const MessageRes = z
+  .object({
+    message: z.string()
+  })
+  .strict()
+
+export type MessageResType = z.TypeOf<typeof MessageRes>

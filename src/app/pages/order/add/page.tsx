@@ -1,4 +1,4 @@
-import ApointmentAddForm from "./ApointmentAddForm";
+import ApointmentAddForm from "../_components/ApointmentAddForm";
 
 export default async function ApointmentAddPage() {
   return (

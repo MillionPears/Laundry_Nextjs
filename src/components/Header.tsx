@@ -1,20 +1,24 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "/public/image/logo.png";
-import { cookies } from "next/headers";
 import ProfileDropdownMenuDemo from "@/app/pages/profile/ProfileDropdownMenuDemo";
 import {
   CustomerResType,
   StaffResType,
 } from "@/app/schemaValidations/auth.schema";
+import { useAppContext } from "@/app/app-provider";
+import { useEffect } from "react";
 
 export default function Header({
   user,
 }: {
   user: CustomerResType["data"] | StaffResType["data"] | null;
 }) {
-  const cookieStore = cookies();
-  const sessionToken = cookieStore.get("sessionToken");
+  const { setUser } = useAppContext();
+  useEffect(() => {
+    setUser(user);
+  }, [user, setUser]);
 
   return (
     <header className="flex items-center justify-between p-4 bg-gray-100 shadow-md sticky top-0 left-0 right-0 z-10">
@@ -40,7 +44,7 @@ export default function Header({
               Thông Tin Về Chúng Tôi
             </Link>
           </li>
-          {sessionToken ? (
+          {user ? (
             <>
               <li>
                 <ProfileDropdownMenuDemo />

@@ -22,11 +22,18 @@ import {
 
 import { useAppContext } from "@/app/app-provider";
 import { use, useRef, useState } from "react";
+import {
+  CustomerResType,
+  StaffResType,
+} from "@/app/schemaValidations/auth.schema";
 
-export default function ProfileForm() {
-  const { user } = useAppContext();
-
+export default function ProfileForm({
+  user,
+}: {
+  user: CustomerResType["data"] | StaffResType["data"] | null;
+}) {
   const router = useRouter();
+
   const form = useForm<UpdateProfileBodyType>({
     resolver: zodResolver(UpdateProfileBody),
     defaultValues: {
@@ -44,7 +51,9 @@ export default function ProfileForm() {
   async function onSubmit(values: UpdateProfileBodyType) {
     try {
       //console.log(data.payload.message); // Log response message if needed
+
       router.push("/pages/profile");
+      router.refresh();
     } catch (error) {
       console.error("Error:", error);
     }
@@ -142,7 +151,7 @@ export default function ProfileForm() {
                 </FormItem>
               )}
             />
-            {(file || avatar) && (
+            {/* {(file || avatar) && (
               <div>
                 <Image
                   src={file ? URL.createObjectURL(file) : avatar}
@@ -166,7 +175,7 @@ export default function ProfileForm() {
                   Xóa hình ảnh
                 </Button>
               </div>
-            )}
+            )} */}
 
             <Button
               type="submit"

@@ -1,7 +1,7 @@
 "use client";
 
 // src/app/orders/page.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Pagination,
@@ -12,54 +12,23 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import orderApiRequest from "@/app/apiRequest/order";
+import { useAppContext } from "@/app/app-provider";
+import { Order, OrdersResType } from "@/app/schemaValidations/order.schema";
+import { ZodError } from "zod";
 
-const orders = [
-  {
-    id: 1,
-    orderDate: "2023-07-01",
-    deliveryDate: "2023-07-05",
-    status: "Completed",
-    amount: "$20",
-    deliveryType: "Nhận hàng trực tiếp",
-  },
-  {
-    id: 2,
-    orderDate: "2023-07-02",
-    deliveryDate: "2023-07-06",
-    status: "Pending",
-    amount: "$15",
-    deliveryType: "Thông qua đơn vị vận chuyển",
-  },
-  {
-    id: 3,
-    orderDate: "2023-07-03",
-    deliveryDate: "2023-07-07",
-    status: "Cancelled",
-    amount: "$0",
-    deliveryType: "Nhận hàng trực tiếp",
-  },
-  {
-    id: 3,
-    orderDate: "2023-07-03",
-    deliveryDate: "2023-07-07",
-    status: "Cancelled",
-    amount: "$0",
-    deliveryType: "Nhận hàng trực tiếp",
-  },
-  // Add more orders as needed
-];
-
-const OrderHistory = () => {
+const OrderHistory = ({ orders }: { orders: OrdersResType["data"] }) => {
   const router = useRouter();
 
   const handleViewDetails = (id: number) => {
     // Redirect to order details page
-    router.push(`/orders/${id}`);
+    router.push(`/pages/order/${id}`);
   };
 
   const handleCreateAppointment = () => {
     // Redirect to appointment creation page
-    router.push("/create-appointment");
+
+    router.push("/pages/order/add");
   };
 
   return (
@@ -78,34 +47,34 @@ const OrderHistory = () => {
                 Ngày nhận
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                Trạng thái
+                Số điện thoại nhận
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                Số tiền
+                Địa chỉ nhận
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-blue-700 uppercase tracking-wider">
-                Loại giao hàng
+                Trạng thái đơn hàng
               </th>
               <th className="px-6 py-3"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {orders.map((order) => (
-              <tr key={order.id}>
+            {orders?.map((order) => (
+              <tr key={order.orderId}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {order.orderDate}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {order.deliveryDate}
+                  {order.deadline}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.status}</td>
-                <td className="px-6 py-4 whitespace-nowrap">{order.amount}</td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  {order.deliveryType}
+                  {order.phoneNumber}
                 </td>
+                <td className="px-6 py-4 whitespace-nowrap">{order.address}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{order.status}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <button
-                    onClick={() => handleViewDetails(order.id)}
+                    onClick={() => handleViewDetails(order.orderId)}
                     className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 mr-2"
                   >
                     Xem chi tiết
@@ -117,7 +86,7 @@ const OrderHistory = () => {
         </table>
         <button
           onClick={handleCreateAppointment}
-          className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-full absolute bottom-4 right-4 transition duration-300 transform hover:scale-105"
+          className="bg-blue-500 hover:bg-blue-700  text-white py-2 px-4 rounded-full absolute bottom-4 right-4 transition duration-300 transform hover:scale-105"
         >
           Tạo lịch hẹn mới
         </button>

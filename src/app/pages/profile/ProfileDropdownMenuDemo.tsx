@@ -1,3 +1,11 @@
+"use client";
+
+import authApiRequest from "@/app/apiRequest/auth";
+import { useAppContext } from "@/app/app-provider";
+import {
+  CustomerResType,
+  StaffResType,
+} from "@/app/schemaValidations/auth.schema";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -11,8 +19,36 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect } from "react";
 
-export default function ProfileDropdownMenuDemo() {
+export default function DropdownMenuDemo() {
+  const router = useRouter();
+  const { user, setUser } = useAppContext();
+
+  const handleViewOrders = () => {
+    // Điều hướng đến trang lịch sử đơn hàng
+    router.push("/pages/order");
+
+    // Sau khi điều hướng hoàn tất, gọi router.refresh để làm mới dữ liệu
+    router.refresh();
+  };
+  const handleLogout = useCallback(async () => {
+    try {
+      await authApiRequest.logoutFromNextClientToNextServer();
+      router.push("/pages/login");
+      setUser(null);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      // Nếu muốn xử lý lỗi cụ thể hơn, có thể kiểm tra lỗi và in ra các thông tin chi tiết
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Stack trace:", error.stack);
+      } else {
+        console.error("Unknown error:", error);
+      }
+    }
+  }, [setUser]);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,34 +57,23 @@ export default function ProfileDropdownMenuDemo() {
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-40">
-        {" "}
-        {/* Adjusted width */}
-        <DropdownMenuLabel className="text-sm">
-          {" "}
-          {/* Adjust font size */}
-          Tài khoản của tôi
-        </DropdownMenuLabel>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Tài khoản của tôi</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-sm">
-          {" "}
-          {/* Adjust font size */}
+        <DropdownMenuItem>
           <Link href="/pages/profile">Profile</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-sm">
-          {" "}
-          {/* Adjust font size */}
-          <Link href="/order-history">Lịch sử đơn hàng</Link>
+        <DropdownMenuItem onClick={handleViewOrders}>
+          Lịch sử đơn hàng
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-sm">
-          {" "}
-          {/* Adjust font size */}
-          <Link href="/pages/apointment">Tạo lịch hẹn</Link>
+        <DropdownMenuItem>
+          <Link href="/create-appointment">Tạo lịch hẹn</Link>
         </DropdownMenuItem>
-        <DropdownMenuItem className="text-sm">
-          {" "}
-          {/* Adjust font size */}
-          Đăng xuất
+        <DropdownMenuItem>
+          <Button size={"sm"} onClick={handleLogout}>
+            {" "}
+            Đăng Xuất
+          </Button>
         </DropdownMenuItem>
       </DropdownMenuContent>
       <DropdownMenuSeparator />
