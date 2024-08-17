@@ -46,6 +46,9 @@ export default function Header({
           </li>
           {user ? (
             <>
+              <li className="text-blue-600">
+                Xin chào, <span className="font-semibold">{user.name}</span>
+              </li>
               <li>
                 <ProfileDropdownMenuDemo />
               </li>
@@ -53,7 +56,7 @@ export default function Header({
           ) : (
             <li>
               <Link
-                href="/pages/login"
+                href="/login"
                 className="text-blue-600 border border-blue-600 hover:bg-blue-600 hover:text-white font-semibold transition duration-300 px-4 py-2 rounded-full"
               >
                 Đăng Nhập

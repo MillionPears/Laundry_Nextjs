@@ -1,12 +1,13 @@
 import envConfig from "@/config"
 import { LoginResType } from "../schemaValidations/auth.schema"
+import { redirect } from "next/navigation"
 
 
 type CustomOptions = Omit<RequestInit, 'method'> & {
   baseUrl?: string | undefined
 }
 
-
+const AUTHENTICATION_ERROR_STATUS = 401
 export class HttpError extends Error {
   status: number
   payload: {
@@ -31,10 +32,13 @@ class SessionToken{
             throw new Error('Cannot token on server side')
         }
         this.token=token
+        //console.log('clientSessionToken set to:', this.token)  // In ra giá trị của token khi được set
+   
     }
 }
 
 export const clientSessionToken=new SessionToken()
+//console.log('clientSessionToken set to 2:', clientSessionToken.value)
 
 const request = async<Response> (
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
@@ -68,16 +72,24 @@ const request = async<Response> (
     }
     
     if(!res.ok)
-    {
-       
+    {   
+    
         throw new HttpError(data)
     }
     if(typeof window !== 'undefined'){
-    if(['/user/login'].includes(url)) {
+    if(['/user/login','/user/register'].includes(url)) {
         clientSessionToken.value=(payload as LoginResType).data.token
-    }else if('/user/logout'.includes(url)) {
-        clientSessionToken.value=''
     }}
+    // if(typeof window !== 'undefined'){
+    // if(['/user/login','/user/register'].includes(url)) {
+        
+    // const { token } = (payload as LoginResType).data
+    //   clientSessionToken.value = token
+    //   localStorage.setItem('sessionToken', token) // Ensure token is also saved in localStorage
+    
+    // }else if('/user/logout'.includes(url)) {
+    //     clientSessionToken.value=''
+    // }}
     return data;
  }
 

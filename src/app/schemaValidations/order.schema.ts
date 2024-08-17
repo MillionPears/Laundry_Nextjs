@@ -28,11 +28,14 @@ export const Order = z.object({
   note: z.string(),
   deadline: z.string(),
   customerId: z.number(),
-  status: z.number().transform((val) => statusMap[val] || "khác"), // Sử dụng object map để chuyển đổi
-  deliveryTypeId: z.number().transform((val) => deliveryTypeMap[val] ||"khác"),
-  deliveryStatus: z.number().transform((val) => deliveryStatusMap[val] ||"khác"),
+  //status: z.number().transform((val) => statusMap[val] || "khác"), // Sử dụng object map để chuyển đổi
+  status: z.number(),
+  deliveryTypeId: z.number(),
+  deliveryStatus: z.number(),
   phoneNumber: z.string(),
-  address: z.string()
+  address: z.string(),
+  customerName: z.string(),
+  email: z.string()
 });
 export const OrderRes =z.object({
   data: Order,
@@ -51,12 +54,17 @@ export const OrderCreateBody = z.object({
   note: z.string(),
   deadline: z.string(),
   deliveryTypeId: z.number(),
-  phoneNumber: z.string().optional(), // Cập nhật kiểu để cho phép undefined
-  address: z.string()
+  phoneNumber: z.string(), // Cập nhật kiểu để cho phép undefined
+  address: z.string(),
+  email: z.string()
 });
 
 
 export const OrderDetail= z.object({
+id:z.object({
+  orderId: z.number(),
+  serviceId: z.number(),
+}),
 serviceName: z.string(),
 amount: z.number(),
 price: z.number()
@@ -66,9 +74,24 @@ export const OrderDetailRes = z.object({
   message: z.string()
 });
 
+
+export const OrderDetailCreateBody = z.object({
+  id: z.object({
+orderId: z.number(),
+  serviceId: z.number(),
+  }),
+  amount: z.number(),
+  price: z.number()
+});
+
 export type CreateOrderBodyType = z.TypeOf<typeof OrderCreateBody>
+
 export type OrdersResType = z.TypeOf<typeof OrdersRes>
+
 export type OrderResType = z.TypeOf<typeof OrderRes>
+
 export type OrderDetailResType = z.TypeOf<typeof OrderDetailRes>
+
+export type CreateOrderDetailBodyType = z.TypeOf<typeof OrderDetailCreateBody>
 
 

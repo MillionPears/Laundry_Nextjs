@@ -26,7 +26,8 @@ const profileApiRequest = {
   updateProfile: (id: number, body: UpdateProfileBodyType) =>
     http.put<ProfileResType>(`/customer/update/${id}`, body),
   profileClient: (username:string) => http.get<ProfileResType>(`/user/getbyusername/${username}`),
-
+  customerClient:  (username:string) => http.get<CustomerResType>(`/customer/getbyusername/${username}`),
+  
 }
 
 export default profileApiRequest

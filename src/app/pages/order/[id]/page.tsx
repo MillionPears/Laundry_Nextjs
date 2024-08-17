@@ -15,7 +15,7 @@ export default async function OrderDetailPage({
   params: { id: string };
 }) {
   const orderId = parseInt(params.id);
-
+  console.log("haha", orderId);
   const cookieStore = cookies();
   let orderDetail: OrderDetailResType["data"] | null = null;
   const sessionToken = cookieStore.get("sessionToken");
@@ -25,6 +25,7 @@ export default async function OrderDetailPage({
       sessionToken.value
     );
     orderDetail = result.payload.data;
+    // console.log("haha", orderDetail);
   }
 
   return (

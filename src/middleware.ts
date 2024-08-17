@@ -1,30 +1,61 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
- 
-const privatePaths = ['/profile']
-const authPaths = ['/login', '/register']
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-  const {pathname} = request.nextUrl
-  const sessionToken = request.cookies.get('sessionToken')?.value
+import authApiRequest from './app/apiRequest/auth'
 
-  // Chưa đăng nhập thì không cho vào private paths
-  if (privatePaths.some((path) => pathname.startsWith(path)) && !sessionToken) {
+const authPaths = ['/login', '/pages/register']
+const adminPath = '/admin'
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+  const sessionToken = request.cookies.get('sessionToken')?.value
+  const username = request.cookies.get("username")?.value;
+  let isStaff = false;
+   if (username && sessionToken){
+  const roleData = await authApiRequest.roleid(
+        username,
+        sessionToken
+      );
+      if (roleData.payload.data !== 1) {
+    isStaff=true;
+  }
+  }
+  
+  // Nếu chưa đăng nhập và đường dẫn không phải là /login hoặc /register
+  if (!sessionToken && pathname !== '/' && !authPaths.some((path) => pathname.startsWith(path))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
-  // Đăng nhập rồi thì không cho vào login/register nữa
-  if (authPaths.some((path) => pathname.startsWith(path)) && sessionToken) {
-    return NextResponse.redirect(new URL('/me', request.url))
+
+  if(sessionToken){
+    if(isStaff){
+      // Không cho phép truy cập vào trang chính (/)
+      if (pathname === '/') {
+        return NextResponse.redirect(new URL(adminPath, request.url))
+      }
+     
+      // Không cho phép truy cập vào các trang authPaths
+      if (authPaths.some((path) => pathname.startsWith(path))) {
+        return NextResponse.redirect(new URL(adminPath, request.url))
+      }
+    }else{
+      
+      // Nếu không ở trang admin
+      // Không Cho phép truy cập vào các trang authPaths và trang chính (/)
+      // Nhưng nếu truy cập vào trang admin từ các đường dẫn khác, chuyển hướng về trang chính
+      if (pathname.startsWith(adminPath)) {
+        
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+      if (authPaths.some((path) => pathname.startsWith(path))) {
+        return NextResponse.redirect(new URL('/', request.url))
+      }
+    }
   }
-  // if (pathname.match(productEditRegex) && !sessionToken) {
-  //   return NextResponse.redirect(new URL('/login', request.url))
-  // }
+  
+
+  // Tiếp tục với các yêu cầu khác
   return NextResponse.next()
 }
- 
-// See "Matching Paths" below to learn more
+
+// Cấu hình matcher để áp dụng middleware cho tất cả các đường dẫn
 export const config = {
-  matcher: [
-    '/login','/register'
-  ],
+  matcher: '/((?!api|_next/static|_next/image|favicon.ico).*)',
 }

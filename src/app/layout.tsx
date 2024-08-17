@@ -11,7 +11,8 @@ import {
   StaffResType,
 } from "./schemaValidations/auth.schema";
 import authApiRequest from "./apiRequest/auth";
-import { HttpError } from "./untils/http";
+import HeaderAdmin from "@/components/HeaderAdmin";
+import DefaultLayout from "@/components/DefaultLayout";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -35,6 +36,7 @@ export default async function RootLayout({
   // }
   const username = cookieStore.get("username");
 
+  let isStaff = false;
   if (username && sessionToken) {
     try {
       const roleData = await authApiRequest.roleid(
@@ -56,6 +58,7 @@ export default async function RootLayout({
             sessionToken.value
           );
           user = result.payload.data;
+          isStaff = true;
         }
       }
     } catch (error) {
@@ -68,6 +71,18 @@ export default async function RootLayout({
         console.error("Unknown error:", error);
       }
     }
+  }
+
+  if (isStaff) {
+    return (
+      <html lang="en">
+        <body className={inter.className}>
+          <AppProvider initialSessionToken={sessionToken?.value} user={user}>
+            <DefaultLayout user={user}>{children}</DefaultLayout>
+          </AppProvider>
+        </body>
+      </html>
+    );
   }
 
   return (

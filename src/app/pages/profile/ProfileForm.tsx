@@ -21,11 +21,13 @@ import {
 } from "@/app/schemaValidations/profile.schema";
 
 import { useAppContext } from "@/app/app-provider";
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import {
   CustomerResType,
   StaffResType,
 } from "@/app/schemaValidations/auth.schema";
+import Spinner from "@/components/Spinne";
+import profileApiRequest from "@/app/apiRequest/profile";
 
 export default function ProfileForm({
   user,
@@ -37,47 +39,54 @@ export default function ProfileForm({
   const form = useForm<UpdateProfileBodyType>({
     resolver: zodResolver(UpdateProfileBody),
     defaultValues: {
-      name: user?.name,
-      email: user?.email,
-      phoneNumber: user?.phoneNumber,
-      avatar: user?.avatar,
+      name: user?.name || "",
+      email: user?.email || "",
+      phoneNumber: user?.phoneNumber || "",
+      avatar: user?.avatar || "",
     },
   });
 
   const [file, setFile] = useState<File | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const avatar = form.watch("avatar");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function onSubmit(values: UpdateProfileBodyType) {
+    setIsLoading(true); // Start loading spinner
     try {
-      //console.log(data.payload.message); // Log response message if needed
-
+      const result = await profileApiRequest.updateProfile;
       router.push("/pages/profile");
       router.refresh();
     } catch (error) {
       console.error("Error:", error);
+    } finally {
+      setIsLoading(false); // Stop loading spinner
     }
   }
 
   return (
     <div className="max-w-4xl mx-auto bg-blue-100 p-8 rounded-lg shadow-lg">
+      <Spinner isLoading={isLoading} />
       <h2 className="text-2xl font-bold text-blue-600 mb-8">Update Profile</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="flex space-x-8">
           <div className="w-7/12 space-y-6">
-            <FormItem>
-              <FormLabel className="block text-gray-700 text-sm font-bold mb-2">
-                Username
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="shadcn"
-                  value={user?.username}
-                  readOnly
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                />
-              </FormControl>
-            </FormItem>
+            {/* Conditionally render username field */}
+            {user && (
+              <FormItem>
+                <FormLabel className="block text-gray-700 text-sm font-bold mb-2">
+                  Username
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="shadcn"
+                    value={user?.username}
+                    readOnly
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
             <FormField
               control={form.control}
               name="name"
@@ -89,7 +98,8 @@ export default function ProfileForm({
                   <FormControl>
                     <Input
                       placeholder="Enter your full name"
-                      value={user?.name}
+                      value={field.value}
+                      onChange={field.onChange}
                       className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     />
                   </FormControl>
@@ -151,31 +161,6 @@ export default function ProfileForm({
                 </FormItem>
               )}
             />
-            {/* {(file || avatar) && (
-              <div>
-                <Image
-                  src={file ? URL.createObjectURL(file) : avatar}
-                  width={128}
-                  height={128}
-                  alt="preview"
-                  className="w-32 h-32 object-cover"
-                />
-                <Button
-                  type="button"
-                  variant={"destructive"}
-                  size={"sm"}
-                  onClick={() => {
-                    setFile(null);
-                    form.setValue("avatar", "");
-                    if (inputRef.current) {
-                      inputRef.current.value = "";
-                    }
-                  }}
-                >
-                  Xóa hình ảnh
-                </Button>
-              </div>
-            )} */}
 
             <Button
               type="submit"

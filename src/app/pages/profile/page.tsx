@@ -8,6 +8,7 @@ import {
   CustomerResType,
   StaffResType,
 } from "@/app/schemaValidations/auth.schema";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Hồ sơ người dùng",

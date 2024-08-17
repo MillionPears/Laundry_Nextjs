@@ -14,6 +14,8 @@ const authApiRequest={
     }) ,
     logoutFromNextClientToNextServer: () => http.post('/api/auth/logout', null,{
       baseUrl: ''
-    })
+    }),
+    roleIdClient:(username: string) => http.get<RoleResType>(`/user/getroleid/byusername/${username}`) ,
+    
 }
 export default authApiRequest

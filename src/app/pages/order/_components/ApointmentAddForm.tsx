@@ -10,6 +10,7 @@ import Alert from "@/components/Alert";
 
 export default function AppointmentAddPage() {
   const { user } = useAppContext();
+
   const router = useRouter();
   const [formData, setFormData] = useState<CreateOrderBodyType>({
     orderDate: "",
@@ -17,11 +18,20 @@ export default function AppointmentAddPage() {
     deadline: "",
     customerId: user?.id,
     deliveryTypeId: 1,
-    phoneNumber: user?.phoneNumber,
+    phoneNumber: user?.phoneNumber || "",
     address: "",
+    email: user?.email || "",
   });
 
+  const truncateAddress = (address: string, maxLength: number) => {
+    if (address.length > maxLength) {
+      return `${address.substring(0, maxLength)}...`;
+    }
+    return address;
+  };
+
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -29,20 +39,26 @@ export default function AppointmentAddPage() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    const updatedValue = name === "deliveryTypeId" ? Number(value) : value;
+    setFormData({ ...formData, [name]: updatedValue });
+
+    if (name === "phoneNumber") {
+      const phonePattern = /^0[35789]\d{8}$/;
+      if (!phonePattern.test(value)) {
+        setPhoneError("Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.");
+      } else {
+        setPhoneError(null);
+      }
+    }
 
     if (name === "orderDate") {
-      // Reset error when delivery date changes
       setError(null);
-
-      // Disable pickup date if delivery date is not selected
       if (!value) {
         setFormData({ ...formData, deadline: "" });
       }
     }
 
     if (name === "deadline") {
-      // Validate pickup date based on delivery date
       if (formData.orderDate && value) {
         const deliveryDate = new Date(formData.orderDate);
         const threeDaysLater = new Date(
@@ -58,23 +74,15 @@ export default function AppointmentAddPage() {
         }
       }
     }
-
-    if (name === "address") {
-      // Clear delivery address if delivery method is "direct"
-      if (formData.deliveryTypeId === 1) {
-        setFormData({ ...formData, address: "" });
-      }
-    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     try {
       const response = await orderApiRequest.createOrder(formData);
       Alert.success("Thành công!", response.payload.message);
       router.push("/pages/order");
-      router.refresh(); // Optional: Refresh the page after redirection
+      router.refresh();
     } catch (error) {
       console.error("Error creating order:", error);
       setError("Có lỗi xảy ra khi tạo lịch hẹn. Vui lòng thử lại.");
@@ -86,27 +94,27 @@ export default function AppointmentAddPage() {
       <h1 className="text-2xl font-bold text-center text-blue-800 mb-8">
         Tạo lịch hẹn mới
       </h1>
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Delivery Date */}
           <div>
             <label
-              htmlFor="deliveryDate"
+              htmlFor="orderDate"
               className="block text-sm font-medium text-gray-700"
             >
               Ngày giao đồ
             </label>
             <input
-              type="date"
-              id="deliveryDate"
+              type="datetime-local"
+              id="orderDate"
               name="orderDate"
               value={formData.orderDate}
               onChange={handleChange}
-              min={format(new Date(), "yyyy-MM-dd")} // Min date is today
+              min={format(new Date(), "yyyy-MM-dd'T'HH:mm")}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
           </div>
-          {/* Pickup Date */}
+
           <div>
             <label
               htmlFor="deadline"
@@ -120,7 +128,11 @@ export default function AppointmentAddPage() {
               name="deadline"
               value={formData.deadline}
               onChange={handleChange}
-              min={formData.orderDate} // Min date is delivery date
+              min={
+                formData.orderDate
+                  ? format(new Date(formData.orderDate), "yyyy-MM-dd")
+                  : undefined
+              }
               max={
                 formData.orderDate
                   ? format(
@@ -131,18 +143,18 @@ export default function AppointmentAddPage() {
                       "yyyy-MM-dd"
                     )
                   : undefined
-              } // Max date is delivery date + 3 days
-              disabled={!formData.orderDate} // Disable if delivery date is not selected
+              }
+              disabled={!formData.orderDate}
               className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
                 !formData.orderDate && "bg-gray-200"
               }`}
             />
           </div>
         </div>
-        {/* Notes */}
+
         <div>
           <label
-            htmlFor="notes"
+            htmlFor="note"
             className="block text-sm font-medium text-gray-700"
           >
             Ghi chú
@@ -157,7 +169,7 @@ export default function AppointmentAddPage() {
             placeholder="Nhập ghi chú (nếu có)"
           />
         </div>
-        {/* Delivery Method */}
+
         <div>
           <label
             htmlFor="deliveryMethod"
@@ -172,12 +184,11 @@ export default function AppointmentAddPage() {
             onChange={handleChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
-            <option value="1">Nhận hàng trực tiếp</option>
-            <option value="2">Thông qua đơn vị vận chuyển</option>
+            <option value={1}>Nhận hàng trực tiếp</option>
+            <option value={2}>Thông qua đơn vị vận chuyển</option>
           </select>
         </div>
 
-        {/* Delivery Address */}
         {formData.deliveryTypeId === 2 && (
           <div>
             <label
@@ -195,27 +206,50 @@ export default function AppointmentAddPage() {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               placeholder="Nhập địa chỉ nhận"
             />
+            {/* <p className="text-sm text-gray-600">
+              {truncateAddress(formData.address, 20)}
+            </p> */}
           </div>
         )}
-        {/* Recipient Phone */}
+
         <div>
           <label
-            htmlFor="recipientPhone"
+            htmlFor="phoneNumber"
             className="block text-sm font-medium text-gray-700"
           >
             Số điện thoại người nhận
           </label>
           <input
             type="text"
-            id="recipientPhone"
+            id="phoneNumber"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             placeholder="Nhập số điện thoại người nhận"
           />
+          {phoneError && (
+            <p className="text-red-500 text-sm mt-2">{phoneError}</p>
+          )}
         </div>
-        {/* Recipient Name */}
+        <div>
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Email
+          </label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Nhập email người nhận"
+          />
+        </div>
+
         <div>
           <label
             htmlFor="recipientName"
@@ -227,21 +261,21 @@ export default function AppointmentAddPage() {
             type="text"
             id="recipientName"
             name="recipientName"
-            value={user?.name} // Giả sử giá trị là "hahha"
+            value={user?.name || ""}
             onChange={handleChange}
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             placeholder="Nhập họ tên người nhận"
           />
         </div>
-        {/* Error Message */}
+
         {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-        {/* Submit Button */}
+
         <div className="mt-6">
           <button
             type="submit"
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-6 rounded-md shadow-md transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+            className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
-            Đặt lịch hẹn
+            Tạo lịch hẹn
           </button>
         </div>
       </form>

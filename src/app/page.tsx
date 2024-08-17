@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import fetchServiceByStatus from "./api/service";
 
 interface DynamicImageProps {
@@ -10,7 +10,8 @@ const getImagePath = (imageName: string) => {
 };
 
 export default async function Home() {
-  const data = await fetchServiceByStatus(1, false);
+  const data = await fetchServiceByStatus(1, true);
+
   return (
     <main className="container mx-auto px-4  bg-gray-100">
       {/* Giới thiệu */}
@@ -131,25 +132,47 @@ export default async function Home() {
       <section className="flex justify-center w-full bg-blue-50 shadow-lg overflow-hidden">
         <div className="flex flex-col w-full max-w-6xl p-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-center  text-blue-800">
+            <h2 className="text-2xl font-bold text-center text-blue-800">
               Các dịch vụ của chúng tôi
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {(data || []).map((item: any) => (
+            {[
+              {
+                serviceId: 11,
+                serviceName: "Giặt khô",
+                imagePath: "service11",
+              },
+              { serviceId: 12, serviceName: "Ủi đồ", imagePath: "service12" },
+              {
+                serviceId: 13,
+                serviceName: "Giặt hấp",
+                imagePath: "service13",
+              },
+              { serviceId: 14, serviceName: "Gấp đồ", imagePath: "service14" },
+              {
+                serviceId: 15,
+                serviceName: "Giặt đồ len",
+                imagePath: "service15",
+              },
+              {
+                serviceId: 16,
+                serviceName: "Tẩy vết bẩn",
+                imagePath: "service16",
+              },
+            ].map((item) => (
               <div
                 key={item.serviceId}
                 className="bg-blue-50 rounded-lg overflow-hidden shadow-lg flex flex-col items-center transition-transform transform hover:scale-105"
               >
                 <Image
-                  src={getImagePath(`service${item.serviceId}`)}
+                  src={getImagePath(item.imagePath)}
                   alt={item.serviceName}
                   layout="fixed"
                   width={200}
                   height={200}
                   className="object-cover rounded-t-lg"
                 />
-
                 <div className="p-4 bg-white w-full text-center">
                   <h3 className="text-lg font-bold text-blue-800">
                     {item.serviceName}
@@ -287,7 +310,7 @@ export default async function Home() {
               <div className="absolute inset-0 bg-blue-50 opacity-25"></div>
               <div className="relative z-10 p-4">
                 <figure className="section-item-top-icon text-lg font-bold text-blue-800 text-center">
-                  Daily
+                  Giặt Sấy Gấp
                 </figure>
                 <p className="text-sm text-gray-700 mt-2">
                   Giá gói dịch vụ giặt, sấy và gấp EZClean đã bao gồm nước giặt
@@ -305,7 +328,7 @@ export default async function Home() {
                   <thead className="bg-blue-50 border border-gray-300">
                     <tr>
                       <th
-                        className=" text-center py-2 px-4 text-lg font-semibold text-blue-800 border border-gray-300"
+                        className="text-center py-2 px-4 text-lg font-semibold text-blue-800 border border-gray-300"
                         colSpan={5}
                       >
                         TRỌNG LƯỢNG QUẦN ÁO
@@ -313,55 +336,57 @@ export default async function Home() {
                     </tr>
                     <tr className="bg-gray-100 border border-gray-300">
                       <th></th>
-                      <th className="py-2 px-4 border border-gray-300">
+                      <th className="py-2 px-4 border text-blue-800 border-gray-300">
                         {"< 3KG"}
                       </th>
-                      <th className="py-2 px-4 border border-gray-300">
+                      <th className="py-2 px-4 border text-blue-800 border-gray-300">
                         {"< 5KG"}
                       </th>
-                      <th className="py-2 px-4 border border-gray-300">
+                      <th className="py-2 px-4 border text-blue-800 border-gray-300">
                         {"< 7KG"}
                       </th>
-                      <th className="py-2 px-4 border border-gray-300">
-                        {"< 10KG"}
+                      <th className="py-2 px-4 border text-blue-800 border-gray-300">
+                        {"> 7KG"}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="py-2 px-4 border border-gray-300">
-                        Giặt - Sấy - Gấp - EZClean
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        30.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        45.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        60.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        85.000
-                      </td>
-                    </tr>
-                    <tr className="bg-gray-100">
-                      <td className="py-2 px-4 border border-gray-300">
-                        Giặt - Sấy - Gấp - Cao cấp Jumbo Clean
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        35.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        50.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        65.000
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        90.000
-                      </td>
-                    </tr>
+                    {(data || []).slice(0, 2).map((item: any) => {
+                      const discountPerKg = [
+                        { limit: 5, discount: 1000 },
+                        { limit: 7, discount: 2000 },
+                        { limit: Infinity, discount: 3000 },
+                      ];
+
+                      return (
+                        <tr key={item.serviceId}>
+                          <td className="py-2 px-4 border border-gray-300">
+                            {item.serviceName}
+                          </td>
+                          <td className="py-2 px-4 border border-gray-300">
+                            {item.price.toLocaleString("vi-VN")} đ /kg
+                          </td>
+                          <td className="py-2 px-4 border border-gray-300">
+                            {(
+                              item.price - discountPerKg[0].discount
+                            ).toLocaleString("vi-VN")}{" "}
+                            đ /kg
+                          </td>
+                          <td className="py-2 px-4 border border-gray-300">
+                            {(
+                              item.price - discountPerKg[1].discount
+                            ).toLocaleString("vi-VN")}{" "}
+                            đ/kg
+                          </td>
+                          <td className="py-2 px-4 border border-gray-300">
+                            {(
+                              item.price - discountPerKg[2].discount
+                            ).toLocaleString("vi-VN")}{" "}
+                            đ/kg
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -382,39 +407,29 @@ export default async function Home() {
                 <table className="w-full text-left">
                   <thead className="border-b border-gray-300">
                     <tr>
-                      <th className="py-2  text-blue-800">DỊCH VỤ</th>
-                      <th className="py-2  text-blue-800">Giá</th>
+                      <th className="py-2 text-blue-800">DỊCH VỤ</th>
+                      <th className="py-2 text-blue-800">Giá</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-300">
-                    <tr>
-                      <td className="py-2">Chăn, Ga, Mùn, Mền</td>
-                      <td className="py-2">30.000/ KG</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Gấu bông loại nhỏ (15 - 30cm)</td>
-                      <td className="py-2">15.000/ con</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Gấu bông loại vừa (60cm)</td>
-                      <td className="py-2">40.000/ con</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Gấu bông loại lớn (120cm)</td>
-                      <td className="py-2">70.000/ con</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Giày Sneaker</td>
-                      <td className="py-2">30.000/ đôi</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Ủi quần áo (Là hơi)</td>
-                      <td className="py-2">7.000/ cái</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2">Phụ thu giặt tay</td>
-                      <td className="py-2">Từ 5.000 - 10.000/ cái</td>
-                    </tr>
+                    {(data || []).slice(2).map((item: any) => {
+                      let unit = "kg"; // Default unit
+                      if (item.serviceName.toLowerCase().includes("gấu")) {
+                        unit = "con";
+                      } else if (
+                        item.serviceName.toLowerCase().includes("giày")
+                      ) {
+                        unit = "đôi";
+                      }
+                      return (
+                        <tr key={item.serviceId}>
+                          <td className="py-2">{item.serviceName}</td>
+                          <td className="py-2">
+                            {item.price.toLocaleString("vi-VN")} đ / {unit}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
